@@ -1,7 +1,12 @@
 import Head from "next/head";
-import { api } from "~/utils/api";
-import { SignIn, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { api, RouterOutputs } from "~/utils/api";
+import { SignIn, SignInButton, useUser } from "@clerk/nextjs";
 import { NextPage } from "next";
+
+import dayjs from "dayjs";
+import relativeaTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeaTime);
 
 const CreatePostWizard = () => {
 
@@ -13,14 +18,30 @@ const CreatePostWizard = () => {
 
   return (
   <div className="flex gap-3 w-full">
-    <img src="{user.profileImageUrl}" alt="profile image" className="h-14 w-14 rounded-full" />
+    <img src={user.profileImageUrl} alt="profile image" className="h-14 w-14 rounded-full" />
     <input placeholder="Type some emojis!" className="grow bg-transparent outline-none" />
   </div>
   );
 }
 
+type PostWithUser = RouterOutputs["posts"]["getAll"][number];
+const PostView = (props: PostWithUser) => {
+  const { post, author} = props;
+  return (
+    <div key={post.id} className="p-4 border-b border-slate-400 flex gap-3">
+      <img src={author.profileImageUrl} alt="profile image" className="h-14 w-14 rounded-full" />
+      <div className="flex flex-col">
+        <div className="flex gap-1 text-slate-300 font-bold">
+          <span>{`@${author.username}`}</span> · <span className="font-thin">{dayjs(post.createdAt).fromNow()}</span>
+        </div>
+        <span>{post.content}</span>
+      </div>
+      
+    </div>
+  );
+}
 
-const Home: NextPage = () => {
+export default function Home() {
   
   const user = useUser();
 
@@ -47,8 +68,10 @@ const Home: NextPage = () => {
           {user.isSignedIn && <CreatePostWizard />}
        </div>
         <div className="flex flex-col">
-          {[...data, ...data]?.map((post) => (
-            <div key={post.id} className="p-8 border-b border-slate-400">{post.content}</div>))}
+          {[...data]?.map((fullpost) => (
+            <PostView  {...fullpost} key={fullpost.post.id}/>
+          ))}
+            
         </div>
         </div>
       </main>
@@ -56,5 +79,3 @@ const Home: NextPage = () => {
     </>
   );
 }
-
-export default Home;
