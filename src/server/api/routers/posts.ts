@@ -8,7 +8,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { filterUserForClient } from "~/server/helpers/filterUSerForClient";
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
